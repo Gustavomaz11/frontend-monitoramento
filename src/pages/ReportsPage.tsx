@@ -2,15 +2,22 @@ import { Button, Grid, Stack, Typography } from '@mui/material';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { PageSection } from '../components/PageSection';
-import { mockAppUsages, mockDailyPoints, mockDomainAccesses } from '../data/mockData';
+import { parentApi } from '../api/parentApi';
 import { formatDuration } from '../formatters';
+import { useQuery } from '@tanstack/react-query';
 
-export const ReportsPage = () => (
-  <Grid container spacing={2}>
+export const ReportsPage = () => {
+  const summaryQuery = useQuery({ queryKey: ['dashboard-summary'], queryFn: parentApi.getDashboardSummary, retry: false });
+  const summary = summaryQuery.data;
+  const topApp = summary?.topApps[0];
+  const topDomain = summary?.topDomains[0];
+
+  return (
+    <Grid container spacing={2}>
     <Grid size={{ xs: 12, lg: 7 }}>
       <PageSection title="Resumo semanal">
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={mockDailyPoints}>
+          <BarChart data={summary?.dailyPoints ?? []}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis />
@@ -25,15 +32,15 @@ export const ReportsPage = () => (
       <PageSection title="Relatorio diario">
         <Stack spacing={1.5}>
           <Typography>
-            Tempo de tela: <strong>{formatDuration(mockAppUsages.reduce((sum, app) => sum + app.totalForegroundMs, 0))}</strong>
+            Tempo de tela: <strong>{formatDuration(summary?.screenTimeTodayMs ?? 0)}</strong>
           </Typography>
           <Typography>
-            Top app: <strong>{mockAppUsages[0].appName}</strong>
+            Top app: <strong>{topApp?.appName ?? topApp?.packageName ?? 'Nenhum'}</strong>
           </Typography>
           <Typography>
-            Top dominio: <strong>{mockDomainAccesses[0].domain}</strong>
+            Top dominio: <strong>{topDomain?.domain ?? 'Nenhum'}</strong>
           </Typography>
-          <Typography>Tentativas bloqueadas: 2</Typography>
+          <Typography>Tentativas bloqueadas: {summary?.blockedAttemptsCount ?? 0}</Typography>
           <Button startIcon={<FileDownloadIcon />} disabled>
             Exportar CSV/PDF
           </Button>
@@ -41,4 +48,5 @@ export const ReportsPage = () => (
       </PageSection>
     </Grid>
   </Grid>
-);
+  );
+};

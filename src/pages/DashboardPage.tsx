@@ -16,22 +16,21 @@ import {
 } from 'recharts';
 import { MetricCard } from '../components/MetricCard';
 import { PageSection } from '../components/PageSection';
-import {
-  mockCategories,
-  mockDailyPoints,
-  mockDashboardSummary,
-  mockDevices,
-  mockDomainAccesses,
-} from '../data/mockData';
+import { parentApi } from '../api/parentApi';
 import { formatDateTime, formatDuration } from '../formatters';
+import { useQuery } from '@tanstack/react-query';
 
-export const DashboardPage = () => (
-  <Stack spacing={2}>
+export const DashboardPage = () => {
+  const summaryQuery = useQuery({ queryKey: ['dashboard-summary'], queryFn: parentApi.getDashboardSummary, retry: false });
+  const summary = summaryQuery.data;
+
+  return (
+    <Stack spacing={2}>
     <Grid container spacing={2}>
       <Grid size={{ xs: 12, md: 3 }}>
         <MetricCard
           label="Tempo total de tela"
-          value={formatDuration(mockDashboardSummary.screenTimeTodayMs)}
+          value={formatDuration(summary?.screenTimeTodayMs ?? 0)}
           detail="Hoje"
           icon={<AccessTimeIcon color="primary" />}
         />
@@ -39,7 +38,7 @@ export const DashboardPage = () => (
       <Grid size={{ xs: 12, md: 3 }}>
         <MetricCard
           label="Tentativas bloqueadas"
-          value={String(mockDashboardSummary.blockedAttemptsCount)}
+          value={String(summary?.blockedAttemptsCount ?? 0)}
           detail="Ultimas 24 horas"
           icon={<BlockIcon color="error" />}
         />
@@ -47,16 +46,16 @@ export const DashboardPage = () => (
       <Grid size={{ xs: 12, md: 3 }}>
         <MetricCard
           label="Status do celular"
-          value={mockDevices[0].status}
-          detail={mockDevices[0].name}
+          value={summary?.deviceStatus ?? 'sem dispositivos'}
+          detail="API online"
           icon={<PhoneAndroidIcon color="secondary" />}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 3 }}>
         <MetricCard
           label="Ultima sincronizacao"
-          value={formatDateTime(mockDashboardSummary.lastSyncAt)}
-          detail="API de analytics pendente"
+          value={formatDateTime(summary?.lastSyncAt)}
+          detail={summaryQuery.isError ? 'Erro ao carregar API' : 'Backend Render'}
           icon={<CloudSyncIcon color="primary" />}
         />
       </Grid>
@@ -66,7 +65,7 @@ export const DashboardPage = () => (
       <Grid size={{ xs: 12, lg: 7 }}>
         <PageSection title="Comparacao com os sete dias anteriores">
           <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={mockDailyPoints}>
+            <LineChart data={summary?.dailyPoints ?? []}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
@@ -80,7 +79,7 @@ export const DashboardPage = () => (
       <Grid size={{ xs: 12, lg: 5 }}>
         <PageSection title="Categorias mais acessadas">
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={mockCategories}>
+            <BarChart data={summary?.categories ?? []}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="displayName" />
               <YAxis />
@@ -96,25 +95,28 @@ export const DashboardPage = () => (
       <Grid size={{ xs: 12, md: 6 }}>
         <PageSection title="Aplicativos mais utilizados">
           <Stack spacing={1}>
-            {mockDashboardSummary.topApps.map((app) => (
-              <Typography key={app.localId}>
-                <strong>{app.appName}</strong> | {formatDuration(app.totalForegroundMs)} | {app.openCountEstimate} aberturas
+            {(summary?.topApps ?? []).map((app) => (
+              <Typography key={app.id}>
+                <strong>{app.appName ?? app.packageName}</strong> | {formatDuration(app.totalForegroundMs)} | {app.openCountEstimate} aberturas
               </Typography>
             ))}
+            {(summary?.topApps ?? []).length === 0 ? <Typography color="text.secondary">Nenhum aplicativo sincronizado.</Typography> : null}
           </Stack>
         </PageSection>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <PageSection title="Dominios mais acessados">
           <Stack spacing={1}>
-            {mockDomainAccesses.map((domain) => (
-              <Typography key={domain.localId}>
+            {(summary?.topDomains ?? []).map((domain) => (
+              <Typography key={domain.id}>
                 <strong>{domain.domain ?? 'Desconhecido'}</strong> | {domain.category ?? 'sem categoria'} | {domain.accessCount} acessos
               </Typography>
             ))}
+            {(summary?.topDomains ?? []).length === 0 ? <Typography color="text.secondary">Nenhum dominio sincronizado.</Typography> : null}
           </Stack>
         </PageSection>
       </Grid>
     </Grid>
   </Stack>
-);
+  );
+};

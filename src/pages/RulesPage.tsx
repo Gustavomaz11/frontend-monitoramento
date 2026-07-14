@@ -13,7 +13,6 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { PageSection } from '../components/PageSection';
-import { mockRules } from '../data/mockData';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { parentApi } from '../api/parentApi';
 import { useState } from 'react';
@@ -33,13 +32,13 @@ export const RulesPage = () => {
   });
   const updateRule = useMutation({
     mutationFn: (ruleId: string) => {
-      const current = (rulesQuery.data ?? mockRules).find((rule) => rule.id === ruleId);
+      const current = (rulesQuery.data ?? []).find((rule) => rule.id === ruleId);
       if (!current) throw new Error('Regra nao encontrada.');
       return parentApi.updateRule(ruleId, { ...current, enabled: !current.enabled });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rules'] }),
   });
-  const rules = rulesQuery.data ?? mockRules;
+  const rules = rulesQuery.data ?? [];
 
   return (
     <Stack spacing={2}>
@@ -79,6 +78,11 @@ export const RulesPage = () => {
                 <TableCell>{rule.priority}</TableCell>
               </TableRow>
             ))}
+            {rules.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5}>Nenhuma regra cadastrada.</TableCell>
+              </TableRow>
+            ) : null}
           </TableBody>
         </Table>
       </PageSection>

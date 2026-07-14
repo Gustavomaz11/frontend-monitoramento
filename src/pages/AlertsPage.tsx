@@ -3,7 +3,6 @@ import DoneIcon from '@mui/icons-material/Done';
 import RuleIcon from '@mui/icons-material/Rule';
 import { PageSection } from '../components/PageSection';
 import { StatusChip } from '../components/StatusChip';
-import { mockAlerts } from '../data/mockData';
 import { formatDateTime } from '../formatters';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { parentApi } from '../api/parentApi';
@@ -20,7 +19,7 @@ export const AlertsPage = () => {
       parentApi.updateAlertStatus(alertId, status),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['alerts'] }),
   });
-  const alerts = alertsQuery.data ?? mockAlerts;
+  const alerts = alertsQuery.data ?? [];
 
   return (
     <Stack spacing={2}>
@@ -55,6 +54,13 @@ export const AlertsPage = () => {
             </PageSection>
           </Grid>
         ))}
+        {alerts.length === 0 ? (
+          <Grid size={{ xs: 12 }}>
+            <PageSection title="Sem alertas">
+              <Typography color="text.secondary">Nenhum alerta registrado.</Typography>
+            </PageSection>
+          </Grid>
+        ) : null}
       </Grid>
     </Stack>
   );

@@ -38,6 +38,20 @@ export type AppUsageRecord = {
   openCountEstimate: number;
 };
 
+export type AppUsageView = {
+  id: string;
+  deviceId: string;
+  childDisplayName: string;
+  deviceName: string;
+  packageName: string;
+  appName: string | null;
+  usageDate: string;
+  totalForegroundMs: number;
+  firstUsedAt: string | null;
+  lastUsedAt: string | null;
+  openCountEstimate: number;
+};
+
 export type DomainAccessRecord = {
   localId: string;
   domain: string | null;
@@ -126,9 +140,12 @@ export type PrivacyDeleteAllResponse = {
 
 export type DashboardSummary = {
   screenTimeTodayMs: number;
-  topApps: AppUsageRecord[];
-  topDomains: DomainAccessRecord[];
+  topApps: AppUsageView[];
+  topDomains: DomainAccessView[];
+  categories: CategorySummary[];
+  dailyPoints: DailyPoint[];
   blockedAttemptsCount: number;
+  deviceStatus: string;
   lastSyncAt: string | null;
 };
 

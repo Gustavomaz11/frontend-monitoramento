@@ -1,11 +1,13 @@
 import type {
   AuthResponse,
   Alert,
+  AppUsageView,
   BlockingRule,
   CreateRuleRequest,
   DeviceConfig,
   DomainAccessView,
   DeviceSummary,
+  DashboardSummary,
   PairingCodeResponse,
   PrivacyDeleteAllResponse,
   PrivacyExportResponse,
@@ -32,6 +34,8 @@ export const parentApi = {
       body: { childDisplayName, deviceName },
     }),
   listDevices: () => requestJson<DeviceSummary[]>('/api/v1/devices'),
+  getDashboardSummary: () => requestJson<DashboardSummary>('/api/v1/dashboard/summary'),
+  listAppUsages: () => requestJson<AppUsageView[]>('/api/v1/app-usages?limit=200'),
   listDomainAccesses: () => requestJson<DomainAccessView[]>('/api/v1/domain-accesses?limit=200'),
   getDeviceConfig: (deviceId: string) => requestJson<DeviceConfig>(`/api/v1/devices/${deviceId}/config`),
   updateDeviceConfig: (deviceId: string, config: DeviceConfig) =>

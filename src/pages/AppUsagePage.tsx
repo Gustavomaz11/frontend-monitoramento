@@ -10,21 +10,26 @@ import {
 } from '@mui/material';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { PageSection } from '../components/PageSection';
-import { mockAppUsages } from '../data/mockData';
+import { parentApi } from '../api/parentApi';
 import { formatDateTime, formatDuration } from '../formatters';
+import { useQuery } from '@tanstack/react-query';
 
-export const AppUsagePage = () => (
-  <Stack spacing={2}>
+export const AppUsagePage = () => {
+  const appUsagesQuery = useQuery({ queryKey: ['app-usages'], queryFn: parentApi.listAppUsages, retry: false });
+  const appUsages = appUsagesQuery.data ?? [];
+
+  return (
+    <Stack spacing={2}>
     <PageSection title="Filtros">
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-        <TextField label="Crianca" defaultValue="Crianca" />
-        <TextField label="Dispositivo" defaultValue="Celular Android" />
+        <TextField label="Crianca" defaultValue="Todas" />
+        <TextField label="Dispositivo" defaultValue="Todos" />
         <TextField label="Periodo" defaultValue="Hoje" />
       </Stack>
     </PageSection>
     <PageSection title="Uso diario por app" description="Aberturas sao estimativas do UsageStatsManager.">
       <ResponsiveContainer width="100%" height={280}>
-        <BarChart data={mockAppUsages}>
+        <BarChart data={appUsages}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="appName" />
           <YAxis />
@@ -46,9 +51,9 @@ export const AppUsagePage = () => (
           </TableRow>
         </TableHead>
         <TableBody>
-          {mockAppUsages.map((app) => (
-            <TableRow key={app.localId}>
-              <TableCell>{app.appName}</TableCell>
+          {appUsages.map((app) => (
+            <TableRow key={app.id}>
+              <TableCell>{app.appName ?? app.packageName}</TableCell>
               <TableCell>{app.packageName}</TableCell>
               <TableCell>{formatDuration(app.totalForegroundMs)}</TableCell>
               <TableCell>{formatDateTime(app.firstUsedAt)}</TableCell>
@@ -58,8 +63,14 @@ export const AppUsagePage = () => (
               </TableCell>
             </TableRow>
           ))}
+          {appUsages.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6}>Nenhum uso de aplicativo sincronizado.</TableCell>
+            </TableRow>
+          ) : null}
         </TableBody>
       </Table>
     </PageSection>
   </Stack>
-);
+  );
+};

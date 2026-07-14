@@ -5,7 +5,6 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { PageSection } from '../components/PageSection';
 import { parentApi } from '../api/parentApi';
-import { mockDevices } from '../data/mockData';
 import { formatDateTime } from '../formatters';
 
 export const DevicePairingPage = () => {
@@ -21,7 +20,7 @@ export const DevicePairingPage = () => {
     mutationFn: () => parentApi.createPairingCode(childName, deviceName),
   });
 
-  const deviceRows = devices.data ?? mockDevices;
+  const deviceRows = devices.data ?? [];
 
   return (
     <Grid container spacing={2}>
@@ -64,6 +63,9 @@ export const DevicePairingPage = () => {
                 </Typography>
               </Box>
             ))}
+            {deviceRows.length === 0 ? (
+              <Typography color="text.secondary">Nenhum dispositivo vinculado.</Typography>
+            ) : null}
           </Stack>
         </PageSection>
       </Grid>
