@@ -2,6 +2,7 @@ import {
   Alert,
   AppBar,
   Box,
+  Button,
   Divider,
   Drawer,
   List,
@@ -22,7 +23,9 @@ import GppGoodIcon from '@mui/icons-material/GppGood';
 import EventIcon from '@mui/icons-material/Event';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { tokenStore } from '../api/tokenStore';
 
 const drawerWidth = 280;
 
@@ -54,6 +57,12 @@ const pageTitles: Record<string, string> = {
 
 export const AppLayout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const logout = () => {
+    tokenStore.clear();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -102,15 +111,20 @@ export const AppLayout = () => {
         >
           <Toolbar sx={{ justifyContent: 'space-between' }}>
             <Typography variant="h5">{pageTitles[location.pathname] ?? 'Painel'}</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Dados agregados. Sem mensagens, senhas ou conteudo de rede.
-            </Typography>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Typography variant="body2" color="text.secondary">
+                Dados agregados. Sem mensagens, senhas ou conteudo de rede.
+              </Typography>
+              <Button startIcon={<LogoutIcon />} onClick={logout}>
+                Sair
+              </Button>
+            </Stack>
           </Toolbar>
         </AppBar>
 
         <Box component="main" sx={{ p: 3 }}>
           <Alert severity="info" sx={{ mb: 2 }}>
-            Algumas telas usam dados demonstrativos enquanto os endpoints analiticos da API forem completados.
+            Todos os dados exibidos vem da API. Se nao houver sincronizacao, as telas mostram listas vazias ou valores zerados.
           </Alert>
           <Outlet />
         </Box>

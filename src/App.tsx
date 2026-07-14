@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import type { ReactNode } from 'react';
 import { AppLayout } from './layout/AppLayout';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -12,12 +13,29 @@ import { RulesPage } from './pages/RulesPage';
 import { SchedulePage } from './pages/SchedulePage';
 import { ReportsPage } from './pages/ReportsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { tokenStore } from './api/tokenStore';
+
+const RequireAuth = ({ children }: { children: ReactNode }) => {
+  if (!tokenStore.isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+const PublicOnly = ({ children }: { children: ReactNode }) => {
+  if (tokenStore.isAuthenticated()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
 
 export const App = () => (
   <Routes>
-    <Route path="/login" element={<LoginPage />} />
-    <Route path="/cadastro" element={<RegisterPage />} />
-    <Route path="/" element={<AppLayout />}>
+    <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
+    <Route path="/cadastro" element={<PublicOnly><RegisterPage /></PublicOnly>} />
+    <Route path="/" element={<RequireAuth><AppLayout /></RequireAuth>}>
       <Route index element={<Navigate to="/dashboard" replace />} />
       <Route path="dashboard" element={<DashboardPage />} />
       <Route path="vinculacao" element={<DevicePairingPage />} />
@@ -30,6 +48,6 @@ export const App = () => (
       <Route path="relatorios" element={<ReportsPage />} />
       <Route path="privacidade" element={<PrivacyPage />} />
     </Route>
-    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    <Route path="*" element={<Navigate to={tokenStore.isAuthenticated() ? '/dashboard' : '/login'} replace />} />
   </Routes>
 );

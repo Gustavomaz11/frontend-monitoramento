@@ -27,6 +27,13 @@ export const requestJson = async <T>(path: string, options: RequestOptions = {})
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      tokenStore.clear();
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login');
+      }
+    }
+
     const text = await response.text();
     throw new Error(text || `HTTP ${response.status}`);
   }
