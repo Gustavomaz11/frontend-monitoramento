@@ -9,11 +9,38 @@ import type {
   DeviceSummary,
   DashboardSummary,
   PairingCodeResponse,
+  PagedResponse,
   PrivacyDeleteAllResponse,
   PrivacyExportResponse,
   UpdateRuleRequest,
 } from '../models/contracts';
 import { requestJson } from './httpClient';
+
+export type DomainAccessFilters = {
+  deviceId?: string;
+  domain?: string;
+  category?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export type AppUsageFilters = {
+  deviceId?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+const toQueryString = (values: Record<string, string | number | undefined>) => {
+  const params = new URLSearchParams();
+  Object.entries(values).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') params.set(key, String(value));
+  });
+  return params.toString();
+};
 
 export const parentApi = {
   login: (email: string, password: string) =>
@@ -28,6 +55,17 @@ export const parentApi = {
       authenticated: false,
       body: { displayName, email, password, acceptedTerms: true },
     }),
+  refresh: (refreshToken: string) =>
+    requestJson<AuthResponse>('/api/v1/auth/refresh', {
+      method: 'POST',
+      authenticated: false,
+      body: { refreshToken },
+    }),
+  logout: (refreshToken: string) =>
+    requestJson<void>('/api/v1/auth/logout', {
+      method: 'POST',
+      body: { refreshToken },
+    }),
   createPairingCode: (childDisplayName: string, deviceName: string) =>
     requestJson<PairingCodeResponse>('/api/v1/pairing-codes', {
       method: 'POST',
@@ -35,8 +73,10 @@ export const parentApi = {
     }),
   listDevices: () => requestJson<DeviceSummary[]>('/api/v1/devices'),
   getDashboardSummary: () => requestJson<DashboardSummary>('/api/v1/dashboard/summary'),
-  listAppUsages: () => requestJson<AppUsageView[]>('/api/v1/app-usages?limit=200'),
-  listDomainAccesses: () => requestJson<DomainAccessView[]>('/api/v1/domain-accesses?limit=200'),
+  listAppUsages: (filters: AppUsageFilters = {}) =>
+    requestJson<PagedResponse<AppUsageView>>(`/api/v1/app-usages?${toQueryString(filters)}`),
+  listDomainAccesses: (filters: DomainAccessFilters = {}) =>
+    requestJson<PagedResponse<DomainAccessView>>(`/api/v1/domain-accesses?${toQueryString(filters)}`),
   getDeviceConfig: (deviceId: string) => requestJson<DeviceConfig>(`/api/v1/devices/${deviceId}/config`),
   updateDeviceConfig: (deviceId: string, config: DeviceConfig) =>
     requestJson<DeviceConfig>(`/api/v1/devices/${deviceId}/config`, {

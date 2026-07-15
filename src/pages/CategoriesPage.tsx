@@ -9,9 +9,9 @@ const colors = ['#176b5d', '#385b82', '#a15c12', '#667085'];
 
 export const CategoriesPage = () => {
   const summaryQuery = useQuery({ queryKey: ['dashboard-summary'], queryFn: parentApi.getDashboardSummary, retry: false });
-  const domainsQuery = useQuery({ queryKey: ['domain-accesses'], queryFn: parentApi.listDomainAccesses, retry: false });
+  const domainsQuery = useQuery({ queryKey: ['domain-accesses', 'categories'], queryFn: () => parentApi.listDomainAccesses({ pageSize: 100 }), retry: false });
   const categories = summaryQuery.data?.categories ?? [];
-  const domains = domainsQuery.data ?? [];
+  const domains = domainsQuery.data?.items ?? [];
 
   return (
     <Grid container spacing={2}>

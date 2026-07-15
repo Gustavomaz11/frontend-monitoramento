@@ -1,53 +1,56 @@
+import { lazy, Suspense, type ComponentType, type ReactNode } from 'react';
+import { Box, CircularProgress } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import type { ReactNode } from 'react';
 import { AppLayout } from './layout/AppLayout';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { DevicePairingPage } from './pages/DevicePairingPage';
-import { AppUsagePage } from './pages/AppUsagePage';
-import { DomainHistoryPage } from './pages/DomainHistoryPage';
-import { CategoriesPage } from './pages/CategoriesPage';
-import { AlertsPage } from './pages/AlertsPage';
-import { RulesPage } from './pages/RulesPage';
-import { SchedulePage } from './pages/SchedulePage';
-import { ReportsPage } from './pages/ReportsPage';
-import { PrivacyPage } from './pages/PrivacyPage';
 import { tokenStore } from './api/tokenStore';
 
-const RequireAuth = ({ children }: { children: ReactNode }) => {
-  if (!tokenStore.isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
+const loadPage = <T extends Record<string, unknown>>(loader: () => Promise<T>, name: keyof T) =>
+  lazy(async () => ({ default: (await loader())[name] as ComponentType }));
 
-  return children;
-};
+const LoginPage = loadPage(() => import('./pages/LoginPage'), 'LoginPage');
+const RegisterPage = loadPage(() => import('./pages/RegisterPage'), 'RegisterPage');
+const DashboardPage = loadPage(() => import('./pages/DashboardPage'), 'DashboardPage');
+const DevicePairingPage = loadPage(() => import('./pages/DevicePairingPage'), 'DevicePairingPage');
+const AppUsagePage = loadPage(() => import('./pages/AppUsagePage'), 'AppUsagePage');
+const DomainHistoryPage = loadPage(() => import('./pages/DomainHistoryPage'), 'DomainHistoryPage');
+const CategoriesPage = loadPage(() => import('./pages/CategoriesPage'), 'CategoriesPage');
+const AlertsPage = loadPage(() => import('./pages/AlertsPage'), 'AlertsPage');
+const RulesPage = loadPage(() => import('./pages/RulesPage'), 'RulesPage');
+const SchedulePage = loadPage(() => import('./pages/SchedulePage'), 'SchedulePage');
+const ReportsPage = loadPage(() => import('./pages/ReportsPage'), 'ReportsPage');
+const PrivacyPage = loadPage(() => import('./pages/PrivacyPage'), 'PrivacyPage');
 
-const PublicOnly = ({ children }: { children: ReactNode }) => {
-  if (tokenStore.isAuthenticated()) {
-    return <Navigate to="/dashboard" replace />;
-  }
+const RequireAuth = ({ children }: { children: ReactNode }) =>
+  tokenStore.hasSession() ? children : <Navigate to="/login" replace />;
 
-  return children;
-};
+const PublicOnly = ({ children }: { children: ReactNode }) =>
+  tokenStore.hasSession() ? <Navigate to="/dashboard" replace /> : children;
+
+const LoadingPage = () => (
+  <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+    <CircularProgress aria-label="Carregando" />
+  </Box>
+);
 
 export const App = () => (
-  <Routes>
-    <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
-    <Route path="/cadastro" element={<PublicOnly><RegisterPage /></PublicOnly>} />
-    <Route path="/" element={<RequireAuth><AppLayout /></RequireAuth>}>
-      <Route index element={<Navigate to="/dashboard" replace />} />
-      <Route path="dashboard" element={<DashboardPage />} />
-      <Route path="vinculacao" element={<DevicePairingPage />} />
-      <Route path="aplicativos" element={<AppUsagePage />} />
-      <Route path="dominios" element={<DomainHistoryPage />} />
-      <Route path="categorias" element={<CategoriesPage />} />
-      <Route path="alertas" element={<AlertsPage />} />
-      <Route path="regras" element={<RulesPage />} />
-      <Route path="horarios" element={<SchedulePage />} />
-      <Route path="relatorios" element={<ReportsPage />} />
-      <Route path="privacidade" element={<PrivacyPage />} />
-    </Route>
-    <Route path="*" element={<Navigate to={tokenStore.isAuthenticated() ? '/dashboard' : '/login'} replace />} />
-  </Routes>
+  <Suspense fallback={<LoadingPage />}>
+    <Routes>
+      <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
+      <Route path="/cadastro" element={<PublicOnly><RegisterPage /></PublicOnly>} />
+      <Route path="/" element={<RequireAuth><AppLayout /></RequireAuth>}>
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="vinculacao" element={<DevicePairingPage />} />
+        <Route path="aplicativos" element={<AppUsagePage />} />
+        <Route path="dominios" element={<DomainHistoryPage />} />
+        <Route path="categorias" element={<CategoriesPage />} />
+        <Route path="alertas" element={<AlertsPage />} />
+        <Route path="regras" element={<RulesPage />} />
+        <Route path="horarios" element={<SchedulePage />} />
+        <Route path="relatorios" element={<ReportsPage />} />
+        <Route path="privacidade" element={<PrivacyPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to={tokenStore.hasSession() ? '/dashboard' : '/login'} replace />} />
+    </Routes>
+  </Suspense>
 );

@@ -25,19 +25,16 @@ export const tokenStore = {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
   },
-  isAuthenticated: () => {
+  isAccessTokenValid: () => {
     const token = localStorage.getItem(ACCESS_TOKEN_KEY);
     if (!token) return false;
 
     const payload = decodeJwtPayload(token);
-    if (!payload?.exp) {
-      tokenStore.clear();
-      return false;
-    }
+    if (!payload?.exp) return false;
 
     const expiresAtMs = payload.exp * 1000;
     const isValid = expiresAtMs > Date.now() + 30_000;
-    if (!isValid) tokenStore.clear();
     return isValid;
   },
+  hasSession: () => tokenStore.isAccessTokenValid() || Boolean(localStorage.getItem(REFRESH_TOKEN_KEY)),
 };

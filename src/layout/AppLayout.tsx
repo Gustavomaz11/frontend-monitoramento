@@ -24,8 +24,9 @@ import EventIcon from '@mui/icons-material/Event';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { parentApi } from '../api/parentApi';
 import { tokenStore } from '../api/tokenStore';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 const drawerWidth = 280;
 
@@ -59,9 +60,14 @@ export const AppLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const logout = () => {
-    tokenStore.clear();
-    navigate('/login', { replace: true });
+  const logout = async () => {
+    const refreshToken = tokenStore.getRefreshToken();
+    try {
+      if (refreshToken) await parentApi.logout(refreshToken);
+    } finally {
+      tokenStore.clear();
+      navigate('/login', { replace: true });
+    }
   };
 
   return (

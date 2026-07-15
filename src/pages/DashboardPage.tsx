@@ -1,4 +1,4 @@
-import { Grid, Stack, Typography } from '@mui/material';
+import { Alert, Grid, LinearProgress, Stack, Typography } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BlockIcon from '@mui/icons-material/Block';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
@@ -26,6 +26,8 @@ export const DashboardPage = () => {
 
   return (
     <Stack spacing={2}>
+    {summaryQuery.isFetching ? <LinearProgress /> : null}
+    {summaryQuery.error ? <Alert severity="error">{summaryQuery.error.message}</Alert> : null}
     <Grid container spacing={2}>
       <Grid size={{ xs: 12, md: 3 }}>
         <MetricCard

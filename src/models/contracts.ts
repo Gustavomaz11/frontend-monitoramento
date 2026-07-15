@@ -4,6 +4,13 @@ export type AuthResponse = {
   expiresIn: number;
 };
 
+export type PagedResponse<T> = {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+};
+
 export type DeviceSummary = {
   id: string;
   childDisplayName: string;

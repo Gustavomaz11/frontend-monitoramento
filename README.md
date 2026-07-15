@@ -29,11 +29,18 @@ npm run dev
 npm run build
 ```
 
-## Deploy no Render
+## Testes
 
-O arquivo `render.yaml` cria um Static Site:
+```powershell
+npm test
+```
 
-- Build command: `npm ci && npm run build`
-- Publish directory: `dist`
-- Variavel: `VITE_API_BASE_URL=https://backend-monitoramento-vsid.onrender.com`
-- Rewrite SPA: `/* -> /index.html`
+## Deploy na Vercel
+
+- Framework preset: Vite.
+- Build command: `npm run build`.
+- Output directory: `dist`.
+- Variavel: `VITE_API_BASE_URL=https://backend-monitoramento-vsid.onrender.com`.
+- `vercel.json` configura o fallback da SPA e cabecalhos de seguranca.
+
+O backend deve permitir exatamente `https://frontend-monitoramento.vercel.app` em `Cors__AllowedOrigins__0`.
