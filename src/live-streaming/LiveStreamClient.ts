@@ -37,6 +37,7 @@ export class LiveStreamClient {
         await this.connection.start();
         this.events.onStateChanged('stopped', 'Canal ao vivo conectado.');
       },
+      () => this.connection.stop(),
     );
     this.localCandidates = new IceCandidateRelayBuffer(async (candidate) => {
       if (this.connection.state !== signalR.HubConnectionState.Connected || this.sessionId !== candidate.sessionId) return;
@@ -66,6 +67,7 @@ export class LiveStreamClient {
     await this.stop();
 
     const configuration = await parentApi.getLiveStreamConfiguration();
+    await this.connectionCoordinator.reconnect();
     const sessionId = crypto.randomUUID();
     const peerConnection = new RTCPeerConnection({
       iceServers: configuration.iceServers.map((server) => ({
@@ -86,14 +88,12 @@ export class LiveStreamClient {
     try {
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
+      this.armRequestTimeout(sessionId);
+      this.events.onStateChanged('requesting', 'Enviando solicitacao pelo canal ao vivo...');
       await this.connection.invoke('RequestStream', deviceId, sessionId, source, offer.sdp);
+      if (this.sessionId !== sessionId) return;
+      this.events.onStateChanged('requesting', 'Pedido entregue. Aguardando resposta do celular...');
       await this.localCandidates.activate();
-      this.requestTimeoutId = window.setTimeout(() => {
-        if (this.sessionId !== sessionId) return;
-        void this.stop().finally(() => {
-          this.events.onStateChanged('error', 'O celular nao respondeu ao pedido de transmissao.');
-        });
-      }, 30_000);
     } catch (error) {
       this.disposePeerConnection();
       throw error;
@@ -224,5 +224,17 @@ export class LiveStreamClient {
     if (this.requestTimeoutId === null) return;
     window.clearTimeout(this.requestTimeoutId);
     this.requestTimeoutId = null;
+  }
+
+  private armRequestTimeout(sessionId: string) {
+    this.clearRequestTimeout();
+    this.requestTimeoutId = window.setTimeout(() => {
+      if (this.sessionId !== sessionId) return;
+      this.disposePeerConnection();
+      this.events.onStateChanged('error', 'O canal ao vivo nao recebeu resposta do celular em 30 segundos.');
+      if (this.connection.state === signalR.HubConnectionState.Connected) {
+        void this.connection.invoke('StopStream', sessionId).catch(() => undefined);
+      }
+    }, 30_000);
   }
 }

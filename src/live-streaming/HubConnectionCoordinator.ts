@@ -6,6 +6,7 @@ export class HubConnectionCoordinator {
   constructor(
     private readonly readState: () => CoordinatedConnectionState,
     private readonly start: () => Promise<void>,
+    private readonly stop: () => Promise<void> = () => Promise.resolve(),
   ) {}
 
   connect(): Promise<void> {
@@ -21,5 +22,11 @@ export class HubConnectionCoordinator {
     });
     this.connectionAttempt = trackedAttempt;
     return trackedAttempt;
+  }
+
+  async reconnect(): Promise<void> {
+    await this.connectionAttempt?.catch(() => undefined);
+    if (this.readState() !== 'Disconnected') await this.stop();
+    await this.connect();
   }
 }

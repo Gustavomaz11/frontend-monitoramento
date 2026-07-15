@@ -34,4 +34,22 @@ describe('HubConnectionCoordinator', () => {
 
     expect(start).not.toHaveBeenCalled();
   });
+
+  it('replaces an apparently connected channel before a stream request', async () => {
+    let state: CoordinatedConnectionState = 'Connected';
+    const operations: string[] = [];
+    const start = vi.fn(async () => {
+      operations.push('start');
+      state = 'Connected';
+    });
+    const stop = vi.fn(async () => {
+      operations.push('stop');
+      state = 'Disconnected';
+    });
+    const coordinator = new HubConnectionCoordinator(() => state, start, stop);
+
+    await coordinator.reconnect();
+
+    expect(operations).toEqual(['stop', 'start']);
+  });
 });
