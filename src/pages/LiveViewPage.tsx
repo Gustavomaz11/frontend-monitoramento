@@ -94,7 +94,7 @@ export const LiveViewPage = () => {
   return (
     <Stack spacing={2}>
       <Alert severity="info">
-        O celular precisa estar vinculado e com o modo ao vivo ativado. O Android mostra uma notificacao permanente enquanto camera ou tela podem ser transmitidas.
+        A autorizacao e feita uma vez no celular. Enquanto o modo ao vivo e a notificacao do Android permanecerem ativos, voce pode iniciar e encerrar camera ou tela quantas vezes precisar.
       </Alert>
 
       <PageSection title="Dispositivo e fonte">
