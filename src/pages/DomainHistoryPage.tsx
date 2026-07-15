@@ -31,6 +31,8 @@ export const DomainHistoryPage = () => {
   const domainAccessesQuery = useQuery({
     queryKey: ['domain-accesses', filters],
     queryFn: () => parentApi.listDomainAccesses(filters),
+    refetchInterval: 15_000,
+    refetchIntervalInBackground: false,
   });
   const page = domainAccessesQuery.data;
   const rows = page?.items ?? [];

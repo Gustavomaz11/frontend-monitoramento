@@ -21,7 +21,13 @@ import { formatDateTime, formatDuration } from '../formatters';
 import { useQuery } from '@tanstack/react-query';
 
 export const DashboardPage = () => {
-  const summaryQuery = useQuery({ queryKey: ['dashboard-summary'], queryFn: parentApi.getDashboardSummary, retry: false });
+  const summaryQuery = useQuery({
+    queryKey: ['dashboard-summary'],
+    queryFn: parentApi.getDashboardSummary,
+    retry: false,
+    refetchInterval: 15_000,
+    refetchIntervalInBackground: false,
+  });
   const summary = summaryQuery.data;
 
   return (
