@@ -96,7 +96,7 @@ export const PrivacyPage = () => {
           <PageSection title="Direitos e controles">
             <Stack spacing={2}>
               <Alert severity="warning">A exclusao total e irreversivel, revoga tokens e remove os dados pessoais e de monitoramento.</Alert>
-              <Stack direction="row" justifyContent="space-between" alignItems="center"><Typography>VPN habilitada no dispositivo</Typography><Switch checked={configQuery.data?.vpnEnabled ?? false} disabled={!configQuery.data || updateConfig.isPending} onChange={(_, checked) => saveConfig({ vpnEnabled: checked })} /></Stack>
+              <Alert severity="info">A captura de sites é autorizada diretamente no celular, em Acessibilidade. Ela não usa VPN e não pode ser ativada remotamente.</Alert>
               <Stack direction="row" justifyContent="space-between" alignItems="center"><Typography>UsageStats habilitado</Typography><Switch checked={configQuery.data?.usageStatsEnabled ?? false} disabled={!configQuery.data || updateConfig.isPending} onChange={(_, checked) => saveConfig({ usageStatsEnabled: checked })} /></Stack>
               <Button startIcon={<DownloadIcon />} onClick={() => exportRequest.mutate()} disabled={exportRequest.isPending}>Solicitar exportacao</Button>
               {exportRequest.data ? <Alert severity="success">Solicitacao registrada em {formatDateTime(exportRequest.data.createdAt)} para {exportRequest.data.devicesCount} dispositivo(s).</Alert> : null}

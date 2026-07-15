@@ -21,16 +21,9 @@ import { useQuery } from '@tanstack/react-query';
 import { parentApi, type DomainAccessFilters } from '../api/parentApi';
 import { PageSection } from '../components/PageSection';
 import { formatDateTime } from '../formatters';
+import { formatBrowserOrigin } from '../domain/browserNavigation';
 
 const categories = ['social', 'video', 'games', 'education', 'news', 'adult', 'gambling', 'unknown', 'malicious', 'violence'];
-
-const sourceLabels = {
-  dns: 'Consulta DNS',
-  sni_if_available: 'SNI',
-  ip_only: 'Somente IP',
-  manual: 'Manual',
-  unknown: 'Desconhecida',
-} as const;
 
 export const DomainHistoryPage = () => {
   const [draft, setDraft] = useState<DomainAccessFilters>({});
@@ -57,9 +50,9 @@ export const DomainHistoryPage = () => {
 
   return (
     <Stack spacing={2}>
-      <Alert severity="warning">
-        Consulta DNS identifica o dominio, nao a pagina completa, e pode incluir antecipacoes do navegador. DNS privado,
-        DoH, QUIC ou VPN de terceiros podem impedir a identificacao. Horarios no fuso de Brasilia.
+      <Alert severity="info">
+        Este histórico mostra somente sites abertos no navegador do celular. São registrados o protocolo e o domínio
+        principal; caminhos, parâmetros, pesquisas, conteúdo e senhas não são coletados. Horários no fuso de Brasília.
       </Alert>
       <PageSection title="Filtros">
         <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2}>
@@ -77,8 +70,8 @@ export const DomainHistoryPage = () => {
             </Select>
           </FormControl>
           <TextField
-            label="Dominio"
-            placeholder="youtube.com"
+            label="Site / domínio"
+            placeholder="google.com.br"
             value={draft.domain ?? ''}
             onChange={(event) => setDraft((current) => ({ ...current, domain: event.target.value }))}
           />
@@ -104,28 +97,23 @@ export const DomainHistoryPage = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Crianca</TableCell><TableCell>Dominio</TableCell><TableCell>IP</TableCell>
-              <TableCell>Protocolo</TableCell><TableCell>Primeiro</TableCell><TableCell>Ultimo</TableCell>
-              <TableCell>Acessos</TableCell><TableCell>Categoria</TableCell><TableCell>Origem</TableCell>
-              <TableCell>Correlacao</TableCell>
+              <TableCell>Criança</TableCell><TableCell>Site acessado</TableCell>
+              <TableCell>Primeiro acesso</TableCell><TableCell>Último acesso</TableCell>
+              <TableCell>Acessos</TableCell><TableCell>Categoria</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map((domain) => (
               <TableRow key={domain.id}>
                 <TableCell>{domain.childDisplayName}</TableCell>
-                <TableCell>{domain.domain ?? 'Nao identificado'}</TableCell>
-                <TableCell>{domain.source === 'dns' ? 'Resolver local' : (domain.ipAddress ?? 'Indisponivel')}</TableCell>
-                <TableCell>{domain.protocol}{domain.port ? `:${domain.port}` : ''}</TableCell>
+                <TableCell>{formatBrowserOrigin(domain)}</TableCell>
                 <TableCell>{formatDateTime(domain.firstAccessAt)}</TableCell>
                 <TableCell>{formatDateTime(domain.lastAccessAt)}</TableCell>
                 <TableCell>{domain.accessCount}</TableCell>
                 <TableCell>{domain.category ?? 'unknown'}</TableCell>
-                <TableCell>{sourceLabels[domain.source]}</TableCell>
-                <TableCell>{domain.correlationType}</TableCell>
               </TableRow>
             ))}
-            {!domainAccessesQuery.isFetching && rows.length === 0 ? <TableRow><TableCell colSpan={10}>Nenhum dominio encontrado.</TableCell></TableRow> : null}
+            {!domainAccessesQuery.isFetching && rows.length === 0 ? <TableRow><TableCell colSpan={6}>Nenhum site acessado foi registrado.</TableCell></TableRow> : null}
           </TableBody>
         </Table>
         <TablePagination

@@ -73,7 +73,7 @@ export type DomainAccessRecord = {
   localId: string;
   domain: string | null;
   ipAddress: string | null;
-  protocol: 'tcp' | 'udp' | 'icmp' | 'unknown';
+  protocol: 'http' | 'https' | 'tcp' | 'udp' | 'icmp' | 'unknown';
   port: number | null;
   category: string | null;
   firstAccessAt: string;
@@ -81,7 +81,7 @@ export type DomainAccessRecord = {
   accessCount: number;
   foregroundPackageName: string | null;
   correlationType: 'none' | 'estimated' | 'observed';
-  source: 'dns' | 'sni_if_available' | 'ip_only' | 'manual' | 'unknown';
+  source: 'browser_navigation' | 'dns' | 'sni_if_available' | 'ip_only' | 'manual' | 'unknown';
 };
 
 export type DomainAccessView = {
@@ -91,7 +91,7 @@ export type DomainAccessView = {
   deviceName: string;
   domain: string | null;
   ipAddress: string | null;
-  protocol: 'tcp' | 'udp' | 'icmp' | 'unknown';
+  protocol: 'http' | 'https' | 'tcp' | 'udp' | 'icmp' | 'unknown';
   port: number | null;
   category: string | null;
   firstAccessAt: string;
@@ -99,7 +99,7 @@ export type DomainAccessView = {
   accessCount: number;
   foregroundPackageName: string | null;
   correlationType: 'none' | 'estimated' | 'observed';
-  source: 'dns' | 'sni_if_available' | 'ip_only' | 'manual' | 'unknown';
+  source: 'browser_navigation' | 'dns' | 'sni_if_available' | 'ip_only' | 'manual' | 'unknown';
 };
 
 export type Alert = {

@@ -3,6 +3,7 @@ import AddModeratorIcon from '@mui/icons-material/AddModerator';
 import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from 'recharts';
 import { PageSection } from '../components/PageSection';
 import { parentApi } from '../api/parentApi';
+import { formatBrowserOrigin } from '../domain/browserNavigation';
 import { useQuery } from '@tanstack/react-query';
 
 const colors = ['#176b5d', '#385b82', '#a15c12', '#667085'];
@@ -42,7 +43,7 @@ export const CategoriesPage = () => {
                 .filter((domain) => domain.category === category.name)
                 .map((domain) => (
                   <Typography key={domain.id} variant="body2" color="text.secondary">
-                    {domain.domain} | {domain.accessCount} acessos
+                    {formatBrowserOrigin(domain)} | {domain.accessCount} acessos
                   </Typography>
                 ))}
               {category.riskLevel >= 5 ? (

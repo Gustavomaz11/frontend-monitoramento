@@ -18,6 +18,7 @@ import { MetricCard } from '../components/MetricCard';
 import { PageSection } from '../components/PageSection';
 import { parentApi } from '../api/parentApi';
 import { formatDateTime, formatDuration } from '../formatters';
+import { formatBrowserOrigin } from '../domain/browserNavigation';
 import { useQuery } from '@tanstack/react-query';
 
 export const DashboardPage = () => {
@@ -113,14 +114,14 @@ export const DashboardPage = () => {
         </PageSection>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <PageSection title="Dominios mais acessados">
+        <PageSection title="Sites mais acessados">
           <Stack spacing={1}>
             {(summary?.topDomains ?? []).map((domain) => (
               <Typography key={domain.id}>
-                <strong>{domain.domain ?? 'Desconhecido'}</strong> | {domain.category ?? 'sem categoria'} | {domain.accessCount} acessos
+                <strong>{formatBrowserOrigin(domain)}</strong> | {domain.category ?? 'sem categoria'} | {domain.accessCount} acessos
               </Typography>
             ))}
-            {(summary?.topDomains ?? []).length === 0 ? <Typography color="text.secondary">Nenhum dominio sincronizado.</Typography> : null}
+            {(summary?.topDomains ?? []).length === 0 ? <Typography color="text.secondary">Nenhum site acessado foi sincronizado.</Typography> : null}
           </Stack>
         </PageSection>
       </Grid>

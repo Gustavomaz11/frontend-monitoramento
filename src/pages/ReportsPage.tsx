@@ -4,6 +4,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { PageSection } from '../components/PageSection';
 import { parentApi } from '../api/parentApi';
 import { formatDuration } from '../formatters';
+import { formatBrowserOrigin } from '../domain/browserNavigation';
 import { useQuery } from '@tanstack/react-query';
 
 export const ReportsPage = () => {
@@ -38,7 +39,7 @@ export const ReportsPage = () => {
             Top app: <strong>{topApp?.appName ?? topApp?.packageName ?? 'Nenhum'}</strong>
           </Typography>
           <Typography>
-            Top dominio: <strong>{topDomain?.domain ?? 'Nenhum'}</strong>
+            Site mais acessado: <strong>{topDomain ? formatBrowserOrigin(topDomain) : 'Nenhum'}</strong>
           </Typography>
           <Typography>Tentativas bloqueadas: {summary?.blockedAttemptsCount ?? 0}</Typography>
           <Button startIcon={<FileDownloadIcon />} disabled>
