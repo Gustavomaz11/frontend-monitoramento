@@ -77,6 +77,10 @@ export const parentApi = {
       body: { childDisplayName, deviceName },
     }),
   listDevices: () => requestJson<DeviceSummary[]>('/api/v1/devices'),
+  revokeDevice: (deviceId: string) =>
+    requestJson<void>(`/api/v1/devices/${deviceId}`, {
+      method: 'DELETE',
+    }),
   getDashboardSummary: () => requestJson<DashboardSummary>('/api/v1/dashboard/summary'),
   listAppUsages: (filters: AppUsageFilters = {}) =>
     requestJson<PagedResponse<AppUsageView> | AppUsageView[]>(`/api/v1/app-usages?${toQueryString(filters)}`)
