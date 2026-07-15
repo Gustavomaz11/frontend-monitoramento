@@ -1,6 +1,7 @@
 import * as signalR from '@microsoft/signalr';
 import { parentApi } from '../api/parentApi';
 import { apiBaseUrl, getAuthenticatedAccessToken } from '../api/httpClient';
+import { IceCandidateRelayBuffer } from './IceCandidateRelayBuffer';
 
 export type LiveStreamSource = 'camera_front' | 'camera_back' | 'screen';
 export type LiveStreamState = 'connecting' | 'requesting' | 'streaming' | 'stopped' | 'error';
@@ -17,6 +18,7 @@ export class LiveStreamClient {
   private sessionId: string | null = null;
   private pendingCandidates: RTCIceCandidateInit[] = [];
   private requestTimeoutId: number | null = null;
+  private readonly localCandidates: IceCandidateRelayBuffer;
 
   constructor(private readonly events: LiveStreamClientEvents) {
     this.connection = new signalR.HubConnectionBuilder()
@@ -26,6 +28,16 @@ export class LiveStreamClient {
       .withAutomaticReconnect([0, 2_000, 5_000, 10_000, 30_000])
       .configureLogging(signalR.LogLevel.Warning)
       .build();
+    this.localCandidates = new IceCandidateRelayBuffer(async (candidate) => {
+      if (this.connection.state !== signalR.HubConnectionState.Connected || this.sessionId !== candidate.sessionId) return;
+      await this.connection.invoke(
+        'RelayIceCandidate',
+        candidate.sessionId,
+        candidate.candidate,
+        candidate.sdpMid,
+        candidate.sdpMLineIndex,
+      );
+    });
 
     this.registerHubEvents();
   }
@@ -59,6 +71,7 @@ export class LiveStreamClient {
     this.sessionId = sessionId;
     this.peerConnection = peerConnection;
     this.pendingCandidates = [];
+    this.localCandidates.reset();
     this.configurePeerConnection(peerConnection, sessionId);
     peerConnection.addTransceiver('video', { direction: 'recvonly' });
 
@@ -67,6 +80,7 @@ export class LiveStreamClient {
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
       await this.connection.invoke('RequestStream', deviceId, sessionId, source, offer.sdp);
+      await this.localCandidates.activate();
       this.requestTimeoutId = window.setTimeout(() => {
         if (this.sessionId !== sessionId) return;
         void this.stop().finally(() => {
@@ -97,13 +111,16 @@ export class LiveStreamClient {
   private configurePeerConnection(peerConnection: RTCPeerConnection, sessionId: string) {
     peerConnection.onicecandidate = (event) => {
       if (!event.candidate || this.sessionId !== sessionId) return;
-      void this.connection.invoke(
-        'RelayIceCandidate',
+      void this.localCandidates.add({
         sessionId,
-        event.candidate.candidate,
-        event.candidate.sdpMid,
-        event.candidate.sdpMLineIndex ?? 0,
-      );
+        candidate: event.candidate.candidate,
+        sdpMid: event.candidate.sdpMid,
+        sdpMLineIndex: event.candidate.sdpMLineIndex ?? 0,
+      }).catch(() => {
+        if (this.sessionId === sessionId) {
+          this.events.onStateChanged('error', 'Falha ao enviar os dados de conexao de video.');
+        }
+      });
     };
 
     peerConnection.ontrack = (event) => {
@@ -192,6 +209,7 @@ export class LiveStreamClient {
     this.peerConnection = null;
     this.sessionId = null;
     this.pendingCandidates = [];
+    this.localCandidates.reset();
     this.events.onRemoteStream(null);
   }
 
