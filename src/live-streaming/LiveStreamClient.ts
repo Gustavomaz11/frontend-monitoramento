@@ -1,6 +1,7 @@
 import * as signalR from '@microsoft/signalr';
 import { parentApi } from '../api/parentApi';
 import { apiBaseUrl, getAuthenticatedAccessToken } from '../api/httpClient';
+import { HubConnectionCoordinator } from './HubConnectionCoordinator';
 import { IceCandidateRelayBuffer } from './IceCandidateRelayBuffer';
 
 export type LiveStreamSource = 'camera_front' | 'camera_back' | 'screen';
@@ -19,6 +20,7 @@ export class LiveStreamClient {
   private pendingCandidates: RTCIceCandidateInit[] = [];
   private requestTimeoutId: number | null = null;
   private readonly localCandidates: IceCandidateRelayBuffer;
+  private readonly connectionCoordinator: HubConnectionCoordinator;
 
   constructor(private readonly events: LiveStreamClientEvents) {
     this.connection = new signalR.HubConnectionBuilder()
@@ -28,6 +30,14 @@ export class LiveStreamClient {
       .withAutomaticReconnect([0, 2_000, 5_000, 10_000, 30_000])
       .configureLogging(signalR.LogLevel.Warning)
       .build();
+    this.connectionCoordinator = new HubConnectionCoordinator(
+      () => this.connection.state,
+      async () => {
+        this.events.onStateChanged('connecting', 'Conectando ao dispositivo...');
+        await this.connection.start();
+        this.events.onStateChanged('stopped', 'Canal ao vivo conectado.');
+      },
+    );
     this.localCandidates = new IceCandidateRelayBuffer(async (candidate) => {
       if (this.connection.state !== signalR.HubConnectionState.Connected || this.sessionId !== candidate.sessionId) return;
       await this.connection.invoke(
@@ -43,10 +53,7 @@ export class LiveStreamClient {
   }
 
   async connect() {
-    if (this.connection.state !== signalR.HubConnectionState.Disconnected) return;
-    this.events.onStateChanged('connecting', 'Conectando ao dispositivo...');
-    await this.connection.start();
-    this.events.onStateChanged('stopped', 'Canal ao vivo conectado.');
+    await this.connectionCoordinator.connect();
   }
 
   async getDevicePresence(deviceId: string): Promise<boolean> {
