@@ -24,6 +24,7 @@ import EventIcon from '@mui/icons-material/Event';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import LogoutIcon from '@mui/icons-material/Logout';
+import LiveTvIcon from '@mui/icons-material/LiveTv';
 import { parentApi } from '../api/parentApi';
 import { tokenStore } from '../api/tokenStore';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -33,6 +34,7 @@ const drawerWidth = 280;
 const navItems = [
   { label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
   { label: 'Vinculacao', path: '/vinculacao', icon: <DevicesIcon /> },
+  { label: 'Visualizacao ao vivo', path: '/ao-vivo', icon: <LiveTvIcon /> },
   { label: 'Uso de aplicativos', path: '/aplicativos', icon: <AppsIcon /> },
   { label: 'Historico de dominios', path: '/dominios', icon: <PublicIcon /> },
   { label: 'Categorias', path: '/categorias', icon: <CategoryIcon /> },
@@ -46,6 +48,7 @@ const navItems = [
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/vinculacao': 'Vinculacao de dispositivo',
+  '/ao-vivo': 'Visualizacao ao vivo',
   '/aplicativos': 'Uso de aplicativos',
   '/dominios': 'Historico de dominios',
   '/categorias': 'Categorias acessadas',

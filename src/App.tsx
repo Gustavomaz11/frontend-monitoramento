@@ -19,6 +19,7 @@ const RulesPage = loadPage(() => import('./pages/RulesPage'), 'RulesPage');
 const SchedulePage = loadPage(() => import('./pages/SchedulePage'), 'SchedulePage');
 const ReportsPage = loadPage(() => import('./pages/ReportsPage'), 'ReportsPage');
 const PrivacyPage = loadPage(() => import('./pages/PrivacyPage'), 'PrivacyPage');
+const LiveViewPage = loadPage(() => import('./pages/LiveViewPage'), 'LiveViewPage');
 
 const RequireAuth = ({ children }: { children: ReactNode }) =>
   tokenStore.hasSession() ? children : <Navigate to="/login" replace />;
@@ -41,6 +42,7 @@ export const App = () => (
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="vinculacao" element={<DevicePairingPage />} />
+        <Route path="ao-vivo" element={<LiveViewPage />} />
         <Route path="aplicativos" element={<AppUsagePage />} />
         <Route path="dominios" element={<DomainHistoryPage />} />
         <Route path="categorias" element={<CategoriesPage />} />

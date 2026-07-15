@@ -19,6 +19,16 @@ export type DeviceSummary = {
   lastSyncAt: string | null;
 };
 
+export type IceServerConfiguration = {
+  urls: string[];
+  username: string | null;
+  credential: string | null;
+};
+
+export type LiveStreamConfiguration = {
+  iceServers: IceServerConfiguration[];
+};
+
 export type PairingCodeResponse = {
   pairingCode: string;
   expiresAt: string;

@@ -44,3 +44,7 @@ npm test
 - `vercel.json` configura o fallback da SPA e cabecalhos de seguranca.
 
 O backend deve permitir exatamente `https://frontend-monitoramento.vercel.app` em `Cors__AllowedOrigins__0`.
+
+## Visualizacao ao vivo
+
+A rota `/ao-vivo` lista os dispositivos vinculados, mostra a presenca do modo ao vivo e permite selecionar camera frontal, camera traseira ou tela. O navegador usa WebRTC para receber a midia e SignalR para sinalizacao autenticada. A configuracao STUN/TURN vem do backend; nenhuma credencial TURN e embutida no bundle do frontend.

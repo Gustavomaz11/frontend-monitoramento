@@ -7,6 +7,7 @@ import type {
   DeviceConfig,
   DomainAccessView,
   DeviceSummary,
+  LiveStreamConfiguration,
   DashboardSummary,
   PairingCodeResponse,
   PagedResponse,
@@ -77,6 +78,8 @@ export const parentApi = {
       body: { childDisplayName, deviceName },
     }),
   listDevices: () => requestJson<DeviceSummary[]>('/api/v1/devices'),
+  getLiveStreamConfiguration: () =>
+    requestJson<LiveStreamConfiguration>('/api/v1/live-stream/configuration'),
   revokeDevice: (deviceId: string) =>
     requestJson<void>(`/api/v1/devices/${deviceId}`, {
       method: 'DELETE',

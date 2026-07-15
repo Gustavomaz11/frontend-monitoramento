@@ -1,7 +1,7 @@
 import type { AuthResponse } from '../models/contracts';
 import { tokenStore } from './tokenStore';
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'https://backend-monitoramento-vsid.onrender.com';
+export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'https://backend-monitoramento-vsid.onrender.com';
 const requestTimeoutMs = 20_000;
 
 type RequestOptions = {
@@ -85,6 +85,17 @@ const runSessionRefresh = () => {
 
 const ensureFreshSession = async (): Promise<boolean> =>
   tokenStore.isAccessTokenValid() || runSessionRefresh();
+
+export const getAuthenticatedAccessToken = async (): Promise<string> => {
+  if (!(await ensureFreshSession())) {
+    redirectToLogin();
+    throw new ApiError(401, 'Sua sessao expirou. Entre novamente.');
+  }
+
+  const token = tokenStore.getAccessToken();
+  if (!token) throw new ApiError(401, 'Sua sessao expirou. Entre novamente.');
+  return token;
+};
 
 const send = (path: string, options: RequestOptions, accessToken: string | null) => {
   const headers = new Headers({ Accept: 'application/json' });
