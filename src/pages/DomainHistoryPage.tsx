@@ -24,6 +24,14 @@ import { formatDateTime } from '../formatters';
 
 const categories = ['social', 'video', 'games', 'education', 'news', 'adult', 'gambling', 'unknown', 'malicious', 'violence'];
 
+const sourceLabels = {
+  dns: 'Consulta DNS',
+  sni_if_available: 'SNI',
+  ip_only: 'Somente IP',
+  manual: 'Manual',
+  unknown: 'Desconhecida',
+} as const;
+
 export const DomainHistoryPage = () => {
   const [draft, setDraft] = useState<DomainAccessFilters>({});
   const [filters, setFilters] = useState<DomainAccessFilters>({ page: 1, pageSize: 25 });
@@ -50,7 +58,8 @@ export const DomainHistoryPage = () => {
   return (
     <Stack spacing={2}>
       <Alert severity="warning">
-        Dominios podem nao aparecer com DNS privado, DoH, QUIC ou VPN de terceiros. Horarios no fuso de Brasilia.
+        Consulta DNS identifica o dominio, nao a pagina completa, e pode incluir antecipacoes do navegador. DNS privado,
+        DoH, QUIC ou VPN de terceiros podem impedir a identificacao. Horarios no fuso de Brasilia.
       </Alert>
       <PageSection title="Filtros">
         <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2}>
@@ -97,7 +106,8 @@ export const DomainHistoryPage = () => {
             <TableRow>
               <TableCell>Crianca</TableCell><TableCell>Dominio</TableCell><TableCell>IP</TableCell>
               <TableCell>Protocolo</TableCell><TableCell>Primeiro</TableCell><TableCell>Ultimo</TableCell>
-              <TableCell>Acessos</TableCell><TableCell>Categoria</TableCell><TableCell>Correlacao</TableCell>
+              <TableCell>Acessos</TableCell><TableCell>Categoria</TableCell><TableCell>Origem</TableCell>
+              <TableCell>Correlacao</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -105,16 +115,17 @@ export const DomainHistoryPage = () => {
               <TableRow key={domain.id}>
                 <TableCell>{domain.childDisplayName}</TableCell>
                 <TableCell>{domain.domain ?? 'Nao identificado'}</TableCell>
-                <TableCell>{domain.ipAddress ?? 'Indisponivel'}</TableCell>
+                <TableCell>{domain.source === 'dns' ? 'Resolver local' : (domain.ipAddress ?? 'Indisponivel')}</TableCell>
                 <TableCell>{domain.protocol}{domain.port ? `:${domain.port}` : ''}</TableCell>
                 <TableCell>{formatDateTime(domain.firstAccessAt)}</TableCell>
                 <TableCell>{formatDateTime(domain.lastAccessAt)}</TableCell>
                 <TableCell>{domain.accessCount}</TableCell>
                 <TableCell>{domain.category ?? 'unknown'}</TableCell>
+                <TableCell>{sourceLabels[domain.source]}</TableCell>
                 <TableCell>{domain.correlationType}</TableCell>
               </TableRow>
             ))}
-            {!domainAccessesQuery.isFetching && rows.length === 0 ? <TableRow><TableCell colSpan={9}>Nenhum dominio encontrado.</TableCell></TableRow> : null}
+            {!domainAccessesQuery.isFetching && rows.length === 0 ? <TableRow><TableCell colSpan={10}>Nenhum dominio encontrado.</TableCell></TableRow> : null}
           </TableBody>
         </Table>
         <TablePagination
