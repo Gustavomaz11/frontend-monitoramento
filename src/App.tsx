@@ -20,6 +20,7 @@ const SchedulePage = loadPage(() => import('./pages/SchedulePage'), 'SchedulePag
 const ReportsPage = loadPage(() => import('./pages/ReportsPage'), 'ReportsPage');
 const PrivacyPage = loadPage(() => import('./pages/PrivacyPage'), 'PrivacyPage');
 const LiveViewPage = loadPage(() => import('./pages/LiveViewPage'), 'LiveViewPage');
+const OpenChildAppPage = loadPage(() => import('./pages/OpenChildAppPage'), 'OpenChildAppPage');
 
 const RequireAuth = ({ children }: { children: ReactNode }) =>
   tokenStore.hasSession() ? children : <Navigate to="/login" replace />;
@@ -38,6 +39,7 @@ export const App = () => (
     <Routes>
       <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
       <Route path="/cadastro" element={<PublicOnly><RegisterPage /></PublicOnly>} />
+      <Route path="/abrir-app" element={<OpenChildAppPage />} />
       <Route path="/" element={<RequireAuth><AppLayout /></RequireAuth>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
