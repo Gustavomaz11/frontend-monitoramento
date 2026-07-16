@@ -41,7 +41,15 @@ export type DeviceConfig = {
   usageStatsEnabled: boolean;
   syncIntervalMinutes: number;
   timezone: string;
+  usageSchedule: DailyUsageWindow[];
   configVersion: number;
+};
+
+export type DailyUsageWindow = {
+  dayOfWeek: number;
+  enabled: boolean;
+  startMinute: number;
+  endMinute: number;
 };
 
 export type AppUsageRecord = {
